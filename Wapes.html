@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WAPES - Business Software</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+  body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0; padding: 0;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #333;
+  }
+  header {
+    background-color: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: rgba(255 255 255 / 0.85);
+    padding: 10px 0;
+    margin-bottom: 15px;
+  }
+  nav button {
+    padding: 8px 20px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    background-color: #009688;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  nav button:hover {
+    background-color: #00796b;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 15px 40px;
+    background: rgba(255 255 255 / 0.95);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  }
+  .hidden { display: none; }
+  form {
+    max-width: 500px;
+    margin: 20px auto;
+    display: grid;
+    gap: 12px;
+  }
+  label {
+    font-weight: 600;
+  }
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  input[type="file"],
+  input[type="email"],
+  input[type="tel"] {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+  textarea {
+    resize: vertical;
+    height: 70px;
+  }
+  button.btn {
+    background-color: #009688;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  button.btn:hover {
+    background-color: #00796b;
+  }
+  .product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .product-card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 3px 6px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background: #f9f9f9;
+  }
+  .product-info {
+    padding: 10px 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .product-info h3 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+  }
+  .product-info p {
+    flex-grow: 1;
+    font-size: 0.9rem;
+    color: #555;
+    margin: 0 0 10px;
+  }
+  .product-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: #00796b;
+  }
+  .product-info button {
+    align-self: start;
+  }
+  .remove-btn {
+    background-color: #d32f2f !important;
+    margin-top: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  th {
+    background-color: #009688;
+    color: white;
+  }
+  input.qty-input {
+    width: 60px;
+    padding: 6px 8px;
+  }
+  .empty-msg {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    margin-top: 20px;
+  }
+  #order-summary ul {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>WAPES</header>
+
+<nav id="main-nav" class="hidden">
+  <button id="nav-home-btn">Home</button>
+  <button id="nav-cart-btn">Cart (<span id="cart-count">0</span>)</button>
+  <button id="nav-orders-btn" class="hidden">Orders</button>
+  <button id="logout-btn">Logout</button>
+</nav>
+
+<div class="container">
+
+  <!-- Login Section -->
+  <section id="login-section">
+    <h2 style="text-align:center;">Login to WAPES</h2>
+    <form id="login-form">
+      <label for="username-input">Username:</label>
+      <input type="text" id="username-input" required autocomplete="off" />
+      <label for="password-input">Password:</label>
+      <input type="password" id="password-input" required autocomplete="off" />
+      <button type="submit" class="btn">Login</button>
+    </form>
+  </section>
+
+  <!-- Home / Products Section -->
+  <section id="home-section" class="hidden">
+    <h2>Products</h2>
+
+    <!-- Admin Product Add Form -->
+    <form id="product-form" class="hidden" enctype="multipart/form-data" style="margin-bottom:30px;">
+      <h3>Add New Product</h3>
+      <label for="product-name">Name:</label>
+      <input type="text" id="product-name" required autocomplete="off" />
+
+      <label for="product-price">Price (₹):</label>
+      <input type="number" id="product-price" min="0" step="0.01" required />
+
+      <label for="product-description">Description:</label>
+      <textarea id="product-description" required></textarea>
+
+      <label for="product-image">Image (JPG/PNG):</label>
+      <input type="file" id="product-image" accept="image/png,image/jpeg" />
+
+      <button type="submit" class="btn">Add Product</button>
+    </form>
+
+    <div class="product-list" id="products-container"></div>
+  </section>
+
+  <!-- Cart Section -->
+  <section id="cart-section" class="hidden">
+    <h2>Your Cart</h2>
+    <div id="cart-content"></div>
+    <button id="checkout-btn" class="btn" style="display:none; margin-top: 15px;">Proceed to Checkout</button>
+  </section>
+
+  <!-- Checkout Section -->
+  <section id="checkout-section" class="hidden">
+    <h2>Checkout</h2>
+    <form id="checkout-form">
+      <label for="fullname">Full Name:</label>
+      <input type="text" id="fullname" required autocomplete="off" />
+      <label for="email">Email:</label>
+      <input type="email" id="email" required autocomplete="off" />
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" required autocomplete="off" />
+      <label for="address">Delivery Address:</label>
+      <textarea id="address" placeholder="Street, City, State, PIN" required></textarea>
+      <button type="submit" class="btn">Place Order</button>
+    </form>
+  </section>
+
+  <!-- Order Confirmation -->
+  <section id="confirmation-section" class="hidden">
+    <h2>Order Confirmed!</h2>
+    <div id="order-summary"></div>
+    <button id="back-to-home-btn" class="btn" style="margin-top:20px;">Back to Home</button>
+  </section>
+
+  <!-- Admin Orders Section -->
+  <section id="orders-section" class="hidden">
+    <h2>All Orders</h2>
+    <div id="orders-list"></div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  const ADMIN_PASSWORD = 'PRANAVsinghWAPES';
+
+  // Elements
+  const loginSection = document.getElementById('login-section');
+  const loginForm = document.getElementById('login-form');
+  const usernameInput = document.getElementById('username-input');
+  const passwordInput = document.getElementById('password-input');
+
+  const mainNav = document.getElementById('main-nav');
+  const navHomeBtn = document.getElementById('nav-home-btn');
+  const navCartBtn = document.getElementById('nav-cart-btn');
+  const navOrdersBtn = document.getElementById('nav-orders-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const cartCountSpan = document.getElementById('cart-count');
+
+  const homeSection = document.getElementById('home-section');
+  const productForm = document.getElementById('product-form');
+  const productsContainer = document.getElementById('products-container');
+
+  const cartSection = document.getElementById('cart-section');
+  const cartContent = document.getElementById('cart-content');
+  const checkoutBtn = document.getElementById('checkout-btn');
+
+  const checkoutSection = document.getElementById('checkout-section');
+  const checkoutForm = document.getElementById('checkout-form');
+
+  const confirmationSection = document.getElementById('confirmation-section');
+  const orderSummaryDiv = document.getElementById('order-summary');
+  const backToHomeBtn = document.getElementById('back-to-home-btn');
+
+  const ordersSection = document.getElementById('orders-section');
+  const ordersListDiv = document.getElementById('orders-list');
+
+  // Storage keys
+  const STORAGE_PRODUCTS = 'wapes_products';
+  const STORAGE_CART = 'wapes_cart';
+  const STORAGE_ROLE = 'wapes_role';
+  const STORAGE_ORDERS = 'wapes_orders';
+  const STORAGE_USERNAME = 'wapes_username';
+
+  // App State
+  let currentRole = null; // 'admin' or 'user'
+  let currentUsername = null;
+  let products = [];
+  let cart = [];
+  let orders = [];
+
+  // Helpers for localStorage
+  function saveProducts() {
+    localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+  }
+  function loadProducts() {
+    return JSON.parse(localStorage.getItem(STORAGE_PRODUCTS) || '[]');
+  }
+
+  function saveCart() {
+    localStorage.setItem(STORAGE_CART, JSON.stringify(cart));
+  }
+  function loadCart() {
+    return JSON.parse(localStorage.getItem(STORAGE_CART) || '[]');
+  }
+
+  function saveRole() {
+    localStorage.setItem(STORAGE_ROLE, currentRole);
+  }
+  function loadRole() {
+    return localStorage.getItem(STORAGE_ROLE);
+  }
+
+  function saveUsername() {
+    localStorage.setItem(STORAGE_USERNAME, currentUsername);
+  }
+  function loadUsername() {
+    return localStorage.getItem(STORAGE_USERNAME);
+  }
+
+  function saveOrders() {
+    localStorage.setItem(STORAGE_ORDERS, JSON.stringify(orders));
+  }
+  function loadOrders() {
+    return JSON.parse(localStorage.getItem(STORAGE_ORDERS) || '[]');
+  }
+
+  // Show only one section at a time
+  function showSection(section) {
+    [loginSection, homeSection, cartSection, checkoutSection, confirmationSection, ordersSection].forEach(s => {
+      s.classList.add('hidden');
+    });
+    section.classList.remove('hidden');
+  }
+
+  // Update cart count in nav
+  function updateCartCount() {
+    const count = cart.reduce((acc, i) => acc + i.quantity, 0);
+    cartCountSpan.textContent = count;
+  }
+
+  // Read image as base64 (no resizing)
+  function readImageBase64(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) {
+        resolve('');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Image reading error'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Render products list
+  function renderProducts() {
+    productsContainer.innerHTML = '';
+    if (products.length === 0) {
+      productsContainer.innerHTML = '<p style="text-align:center; color:#777;">No products available.</p>';
+      return;
+    }
+    products.forEach((prod, idx) => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+
+      const img = document.createElement('img');
+      img.src = prod.image || '';
+      img.alt = prod.name;
+
+      const info = document.createElement('div');
+      info.className = 'product-info';
+
+      const title = document.createElement('h3');
+      title.textContent = prod.name;
+
+      const price = document.createElement('div');
+      price.className = 'product-price';
+      price.textContent = `₹${prod.price.toFixed(2)}`;
+
+      const desc = document.createElement('p');
+      desc.textContent = prod.description;
+
+      const addToCartBtn = document.createElement('button');
+      addToCartBtn.className = 'btn';
+      addToCartBtn.textContent = 'Add to Cart';
+      addToCartBtn.addEventListener('click', () => {
+        addToCart(idx);
+      });
+
+      info.appendChild(title);
+      info.appendChild(price);
+      info.appendChild(desc);
+      info.appendChild(addToCartBtn);
+
+      if (currentRole === 'admin') {
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn remove-btn';
+        removeBtn.textContent = 'Remove Product';
+        removeBtn.addEventListener('click', () => {
+          if (confirm(`Remove product "${prod.name}"?`)) {
+            products.splice(idx, 1);
+            saveProducts();
+            renderProducts();
+          }
+        });
+        info.appendChild(removeBtn);
+      }
+
+      card.appendChild(img);
+      card.appendChild(info);
+      productsContainer.appendChild(card);
+    });
+  }
+
+  // Add to cart
+  function addToCart(productIndex) {
+    const existing = cart.find(item => item.productIndex === productIndex);
+    if (existing) {
+      existing.quantity++;
+    } else {
+      cart.push({ productIndex, quantity: 1 });
+    }
+    saveCart();
+    updateCartCount();
+    alert('Added to cart!');
+  }
+
+  // Render cart content
+  function renderCart() {
+    cartContent.innerHTML = '';
+    if (cart.length === 0) {
+      cartContent.innerHTML = '<p class="empty-msg">Your cart is empty.</p>';
+      checkoutBtn.style.display = 'none';
+      return;
+    }
+    checkoutBtn.style.display = 'inline-block';
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+      <tr>
+        <th>Product</th>
+        <th>Price (₹)</th>
+        <th>Quantity</th>
+        <th>Total (₹)</th>
+        <th>Action</th>
+      </tr>`;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    let total = 0;
+    cart.forEach((item, i) => {
+      const prod = products[item.productIndex];
+      if (!prod) return;
+
+      const row = document.createElement('tr');
+
+      const nameTd = document.createElement('td');
+      nameTd.textContent = prod.name;
+
+      const priceTd = document.createElement('td');
+      priceTd.textContent = prod.price.toFixed(2);
+
+      const qtyTd = document.createElement('td');
+      const qtyInput = document.createElement('input');
+      qtyInput.type = 'number';
+      qtyInput.min = 1;
+      qtyInput.value = item.quantity;
+      qtyInput.className = 'qty-input';
+      qtyInput.addEventListener('change', e => {
+        const val = parseInt(e.target.value);
+        if (val < 1 || isNaN(val)) {
+          e.target.value = item.quantity;
+          return;
+        }
+        item.quantity = val;
+        saveCart();
+        renderCart();
+        updateCartCount();
+      });
+      qtyTd.appendChild(qtyInput);
+
+      const totalTd = document.createElement('td');
+      const itemTotal = prod.price * item.quantity;
+      total += itemTotal;
+      totalTd.textContent = itemTotal.toFixed(2);
+
+      const actionTd = document.createElement('td');
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.className = 'btn remove-btn';
+      removeBtn.style.padding = '4px 10px';
+      removeBtn.style.fontSize = '0.9rem';
+      removeBtn.addEventListener('click', () => {
+        cart.splice(i, 1);
+        saveCart();
+        renderCart();
+        updateCartCount();
+      });
+      actionTd.appendChild(removeBtn);
+
+      row.appendChild(nameTd);
+      row.appendChild(priceTd);
+      row.appendChild(qtyTd);
+      row.appendChild(totalTd);
+      row.appendChild(actionTd);
+
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+
+    const footer = document.createElement('tfoot');
+    footer.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:right; font-weight:bold;">Total Amount:</td>
+        <td colspan="2" style="font-weight:bold;">₹${total.toFixed(2)}</td>
+      </tr>`;
+    table.appendChild(footer);
+
+    cartContent.appendChild(table);
+  }
+
+  // Render all orders for admin
+  function renderOrders() {
+    ordersListDiv.innerHTML = '';
+    if (orders.length === 0) {
+      ordersListDiv.innerHTML = '<p class="empty-msg">No orders placed yet.</p>';
+      return;
+    }
+
+    orders.forEach((order, idx) => {
+      const div = document.createElement('div');
+      div.style.border = '1px solid #ccc';
+      div.style.borderRadius = '6px';
+      div.style.padding = '12px';
+      div.style.marginBottom = '15px';
+      div.style.background = 'white';
+
+      const title = document.createElement('h3');
+      title.textContent = `Order #${idx+1} by ${order.username}`;
+      div.appendChild(title);
+
+      const details = document.createElement('p');
+      details.innerHTML = `<b>Name:</b> ${order.fullname}<br/>
+        <b>Email:</b> ${order.email}<br/>
+        <b>Phone:</b> ${order.phone}<br/>
+        <b>Address:</b> ${order.address}<br/>
+        <b>Order Date:</b> ${new Date(order.date).toLocaleString()}`;
+      div.appendChild(details);
+
+      const prodList = document.createElement('ul');
+      order.items.forEach(item => {
+        const li = document.createElement('li');
+        const prod = products[item.productIndex];
+        li.textContent = `${prod ? prod.name : '[Removed Product]'} x ${item.quantity} @ ₹${prod ? prod.price.toFixed(2) : 'N/A'}`;
+        prodList.appendChild(li);
+      });
+      div.appendChild(prodList);
+
+      div.appendChild(document.createElement('hr'));
+      ordersListDiv.appendChild(div);
+    });
+  }
+
+  // Clear forms and cart on logout
+  function resetApp() {
+    cart = [];
+    saveCart();
+    products = loadProducts();
+    orders = loadOrders();
+    currentRole = null;
+    currentUsername = null;
+    saveRole();
+    localStorage.removeItem(STORAGE_USERNAME);
+  }
+
+  // Login handler
+  loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+      alert('Enter both username and password.');
+      return;
+    }
+
+    currentUsername = username;
+    if (password === ADMIN_PASSWORD) {
+      currentRole = 'admin';
+    } else {
+      currentRole = 'user';
+    }
+    saveRole();
+    saveUsername();
+    initializeApp();
+  });
+
+  // Logout handler
+  logoutBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to logout?')) {
+      resetApp();
+      showLogin();
+    }
+  });
+
+  // Initialize after login or reload
+  function initializeApp() {
+    products = loadProducts();
+    cart = loadCart();
+    orders = loadOrders();
+    currentRole = loadRole();
+    currentUsername = loadUsername();
+
+    if (!currentRole) {
+      showLogin();
+      return;
+    }
+
+    // Show nav and sections
+    mainNav.classList.remove('hidden');
+    navOrdersBtn.classList.toggle('hidden', currentRole !== 'admin');
+
+    productForm.classList.toggle('hidden', currentRole !== 'admin');
+
+    showSection(homeSection);
+    renderProducts();
+    updateCartCount();
+  }
+
+  // Show login screen only
+  function showLogin() {
+    mainNav.classList.add('hidden');
+    productForm.classList.add('hidden');
+    showSection(loginSection);
+    loginForm.reset();
+    usernameInput.focus();
+  }
+
+  // Handle product form submission (admin only)
+  productForm.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const name = document.getElementById('product-name').value.trim();
+    const price = parseFloat(document.getElementById('product-price').value);
+    const description = document.getElementById('product-description').value.trim();
+    const imageFile = document.getElementById('product-image').files[0];
+
+    if (!name || isNaN(price) || price < 0 || !description) {
+      alert('Please fill all fields correctly.');
+      return;
+    }
+
+    let imageBase64 = '';
+    if (imageFile) {
+      try {
+        imageBase64 = await readImageBase64(imageFile);
+      } catch {
+        alert('Error reading image file.');
+        return;
+      }
+    }
+
+    products.push({
+      name,
+      price,
+      description,
+      image: imageBase64
+    });
+
+    saveProducts();
+    renderProducts();
+
+    productForm.reset();
+    alert('Product added!');
+  });
+
+  // Navigation buttons
+  navHomeBtn.addEventListener('click', () => {
+    showSection(homeSection);
+    renderProducts();
+  });
+
+  navCartBtn.addEventListener('click', () => {
+    showSection(cartSection);
+    renderCart();
+  });
+
+  navOrdersBtn.addEventListener('click', () => {
+    if (currentRole === 'admin') {
+      showSection(ordersSection);
+      renderOrders();
+    }
+  });
+
+  // Checkout button
+  checkoutBtn.addEventListener('click', () => {
+    showSection(checkoutSection);
+    checkoutForm.reset();
+  });
+
+  // Checkout form submit - place order
+  checkoutForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const fullname = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    if (!fullname || !email || !phone || !address) {
+      alert('Please fill all fields.');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('Your cart is empty.');
+      return;
+    }
+
+    const order = {
+      username: currentUsername,
+      fullname,
+      email,
+      phone,
+      address,
+      items: [...cart],
+      date: new Date().toISOString()
+    };
+
+    orders.push(order);
+    saveOrders();
+
+    cart = [];
+    saveCart();
+    updateCartCount();
+
+    // Show confirmation
+    showSection(confirmationSection);
+    renderOrderSummary(order);
+  });
+
+  // Back to home from confirmation
+  backToHomeBtn.addEventListener('click', () => {
+    showSection(homeSection);
+    renderProducts();
+  });
+
+  // Show order summary
+  function renderOrderSummary(order) {
+    orderSummaryDiv.innerHTML = `
+      <p>Thank you, <b>${order.fullname}</b>, for your order!</p>
+      <p><b>Delivery Details:</b><br/>
+      ${order.address}<br/>
+      Phone: ${order.phone}<br/>
+      Email: ${order.email}</p>
+      <p><b>Order Items:</b></p>
+    `;
+
+    const ul = document.createElement('ul');
+    order.items.forEach(item => {
+      const prod = products[item.productIndex];
+      const li = document.createElement('li');
+      li.textContent = `${prod ? prod.name : '[Removed Product]'} x ${item.quantity} @ ₹${prod ? prod.price.toFixed(2) : 'N/A'}`;
+      ul.appendChild(li);
+    });
+    orderSummaryDiv.appendChild(ul);
+  }
+
+  // On page load: if already logged in, restore session
+  window.addEventListener('load', () => {
+    currentRole = loadRole();
+    currentUsername = loadUsername();
+    if (currentRole) {
+      initializeApp();
+    } else {
+      showLogin();
+    }
+  });
+})();
+</script>
+</body>
+</html>
